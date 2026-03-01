@@ -1,14 +1,37 @@
-from flask import Flask, render_template
+from flask import Flask, request, render_template_string
 
 app = Flask(__name__)
 
-# Örnek değerler (sabit)
-current_temp = 24.5
-current_humidity = 55.2
+# Global değişkenler (en son veriyi saklamak için)
+temperature = None
+humidity = None
 
-@app.route("/")
-def home():
-    return render_template("index.html", temp=current_temp, humidity=current_humidity)
+@app.route('/')
+def index():
+    return render_template_string("""
+    <html>
+      <head>
+        <title>Smart Dashboard</title>
+      </head>
+      <body>
+        <h1>Oda Durumu</h1>
+        <p>Sıcaklık: {{ temp if temp is not None else 'Veri yok' }} °C</p>
+        <p>Nem: {{ hum if hum is not None else 'Veri yok' }} %</p>
+      </body>
+    </html>
+    """, temp=temperature, hum=humidity)
 
-if __name__ == "__main__":
-    app.run()
+# ESP32 bu route'u kullanarak veri gönderecek
+@app.route('/update', methods=['GET'])
+def update():
+    global temperature, humidity
+    temp = request.args.get('temp')
+    hum = request.args.get('humidity')
+    if temp and hum:
+        temperature = temp
+        humidity = hum
+        return "OK", 200
+    return "Missing params", 400
+
+if __name__ == '__main__':
+    app.run(debug=True)
