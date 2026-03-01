@@ -2,9 +2,11 @@ from flask import Flask, request, render_template_string
 
 app = Flask(__name__)
 
-# Global değişkenler (en son veriyi saklamak için)
-temperature = None
-humidity = None
+# Tek bir dictionary ile veri sakla
+data = {
+    "temperature": None,
+    "humidity": None
+}
 
 @app.route('/')
 def index():
@@ -15,23 +17,23 @@ def index():
       </head>
       <body>
         <h1>Oda Durumu</h1>
-        <p>Sıcaklık: {{ temp if temp is not None else 'Veri yok' }} °C</p>
-        <p>Nem: {{ hum if hum is not None else 'Veri yok' }} %</p>
+        <p>Sıcaklık: {{ data['temperature'] if data['temperature'] else 'Veri yok' }} °C</p>
+        <p>Nem: {{ data['humidity'] if data['humidity'] else 'Veri yok' }} %</p>
       </body>
     </html>
-    """, temp=temperature, hum=humidity)
+    """, data=data)
 
-# ESP32 bu route'u kullanarak veri gönderecek
 @app.route('/update', methods=['GET'])
 def update():
-    global temperature, humidity
     temp = request.args.get('temp')
     hum = request.args.get('humidity')
-    if temp and hum:
-        temperature = temp
-        humidity = hum
-        return "OK", 200
-    return "Missing params", 400
+    if temp is None or hum is None:
+        return "Missing params", 400
+
+    # Verileri sakla
+    data['temperature'] = temp
+    data['humidity'] = hum
+    return "OK", 200
 
 if __name__ == '__main__':
     app.run(debug=True)
