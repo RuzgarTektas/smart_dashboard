@@ -1,13 +1,13 @@
-from flask import Flask
+from flask import Flask, render_template
 
 app = Flask(__name__)
 
+# Örnek sıcaklık değeri
+current_temp = 24.5
+
 @app.route("/")
 def home():
-    return """
-    <h1>Smart Home Panel</h1>
-    <p>Projem çalışıyor 🔥</p>
-    """
+    return render_template("index.html", temp=current_temp)
 
 if __name__ == "__main__":
     app.run()
