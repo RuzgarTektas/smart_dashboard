@@ -1,0 +1,25 @@
+body {
+    background: linear-gradient(135deg, #1e1e2f, #121212);
+    font-family: Arial, sans-serif;
+}
+
+.card {
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: scale(1.05);
+}
+
+h1 {
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+canvas {
+    background-color: #2a2a40;
+    border-radius: 15px;
+    padding: 20px;
+}
