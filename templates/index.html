@@ -3,27 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <title>ESP32 İklim Paneli</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        /* Genel Body Ayarları */
+        body {
+            background: linear-gradient(135deg, #1f2937, #111827);
+            color: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        h2 {
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        /* Kartlar */
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.7);
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-top: 10px;
+        }
+
+        /* Chart */
+        #chart {
+            background: #1f2937;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        }
+
+        /* Sıcaklık ve Nem renkleri */
+        .temp {
+            color: #ff4d4f; /* kırmızı ton */
+        }
+
+        .hum {
+            color: #4da6ff; /* mavi ton */
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            #chart { padding: 10px; }
+        }
+    </style>
 </head>
-<body class="bg-dark text-white">
+<body>
 
 <div class="container mt-5">
     <h2 class="text-center mb-4">🌡️ Sıcaklık & Nem Takip Paneli</h2>
 
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-6 mb-3">
             <div class="card bg-secondary text-center p-4">
                 <h4>Sıcaklık</h4>
-                <h1 id="temp">-- °C</h1>
+                <h1 id="temp" class="temp">-- °C</h1>
             </div>
         </div>
 
-        <div class="col-md-6">
+        <div class="col-md-6 mb-3">
             <div class="card bg-secondary text-center p-4">
                 <h4>Nem</h4>
-                <h1 id="hum">-- %</h1>
+                <h1 id="hum" class="hum">-- %</h1>
             </div>
         </div>
     </div>
@@ -40,12 +93,28 @@ const chart = new Chart(ctx, {
         datasets: [{
             label: 'Sıcaklık',
             data: [],
-            borderColor: 'red'
+            borderColor: '#ff4d4f',
+            backgroundColor: 'rgba(255,77,79,0.2)',
+            tension: 0.3
         },{
             label: 'Nem',
             data: [],
-            borderColor: 'blue'
+            borderColor: '#4da6ff',
+            backgroundColor: 'rgba(77,166,255,0.2)',
+            tension: 0.3
         }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                labels: { color: '#f8fafc' }
+            }
+        },
+        scales: {
+            x: { ticks: { color: '#f8fafc' } },
+            y: { ticks: { color: '#f8fafc' } }
+        }
     }
 });
 
@@ -60,6 +129,14 @@ function fetchData() {
             chart.data.labels.push(now);
             chart.data.datasets[0].data.push(data.temperature);
             chart.data.datasets[1].data.push(data.humidity);
+
+            // Son 20 veri noktasıyla sınırlama
+            if(chart.data.labels.length > 20) {
+                chart.data.labels.shift();
+                chart.data.datasets[0].data.shift();
+                chart.data.datasets[1].data.shift();
+            }
+
             chart.update();
         });
 }
